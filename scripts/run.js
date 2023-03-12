@@ -3,18 +3,13 @@ const hre = require('hardhat')
 
 async function main() {
   // Define a list of wallets to airdrop Tokens
-  const airdropAddresses = [
-    '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-    '0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc',
-    '0x90f79bf6eb2c4f870365e785982e1f101e93b906',
-    '0x15d34aaf54267db7d7c367839aaf71a00a2c6a65',
-    '0x9965507d1a55bcc2695c58ba16fb37d819b0a4dc',
-  ]
+  const airdropAddresses = []
 
   const amount = ethers.utils.parseEther('10')
 
   const factory = await hre.ethers.getContractFactory('AirToken')
   const [owner] = await hre.ethers.getSigners()
+  const others = await hre.ethers.getSigners()
   const contract = await factory.deploy()
 
   await contract.deployed()
@@ -22,8 +17,10 @@ async function main() {
   console.log('Contract deployed by (Owner): ', owner.address, '\n')
 
   //   Add the addresses
-  for (let j = 0; j < airdropAddresses.length; j++)
-    await contract.addWallet(airdropAddresses[j])
+  for (let j = 0; j < others.length; j++) {
+    await contract.addWallet(others[j].address)
+    airdropAddresses.push(others[j].address)
+  }
 
   const tx = await contract.airdrop(airdropAddresses, amount)
   await tx.wait()
@@ -34,6 +31,9 @@ async function main() {
     let bal = await contract.balanceOf(airdropAddresses[i])
     console.log(`${i + 1}. ${airdropAddresses[i]}: ${bal}`)
   }
+
+  const allCaondidates = await contract.getAllCandidates()
+  console.log('Candidates: ', allCaondidates)
 }
 
 main()

@@ -24,12 +24,14 @@ contract AirToken is ERC20, Ownable {
         );
 
         isCandidate[userAddress] = true;
+        candidates.push(userAddress);
     }
 
     function airdrop(
         address[] calldata recipients,
         uint256 amount
     ) public onlyOwner {
+        // Loop through all recipents array
         for (uint256 i = 0; i < recipients.length; i++) {
             if (isCandidate[recipients[i]]) {
                 _transfer(msg.sender, recipients[i], amount);
